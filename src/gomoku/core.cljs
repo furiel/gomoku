@@ -1,8 +1,12 @@
 (ns gomoku.core
   (:require
-   [reagent.dom :as r]))
+   [reagent.dom :as rd]
+   [reagent.core :as r]
+   [gomoku.board :as board]))
 
 (defn page []
-  [:div "Hello world"])
+  [:div
+   [:div "Board"]
+   [:div (board/board 10 10)]])
 
-(r/render (page) (.getElementById js/document "app"))
+(rd/render [page] (.getElementById js/document "app"))
