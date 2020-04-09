@@ -13,5 +13,5 @@
   :aliases {"fig" ["trampoline" "run" "-m" "figwheel.main"]}
   :main ^:skip-aot gomoku.core
   :target-path "target/%s"
-  :resource-paths ["target"]
+  :resource-paths ["target" "resources"]
   :profiles {:uberjar {:aot :all}})
