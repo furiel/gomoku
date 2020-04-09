@@ -7,6 +7,7 @@
                  [org.clojure/clojurescript "1.10.597"]
                  [org.immutant/immutant "2.1.10"]
                  [com.bhauman/figwheel-main "0.2.3"]
+                 [org.clojure/core.async "1.1.587"]
                  [com.bhauman/rebel-readline-cljs "0.1.4"]
                  [reagent "0.10.0"]]
   :aliases {"fig" ["trampoline" "run" "-m" "figwheel.main"]}
