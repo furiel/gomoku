@@ -3,9 +3,11 @@
    [reagent.dom :as rd]
    [reagent.core :as r]
    [cljs.core.async :refer [chan put! <! go go-loop timeout]]
+   [gomoku.websockets :refer [make-websocket!]]
    [gomoku.board :as board]))
 
 (def event-queue (chan))
+(def websocket-url (str "ws://" (.-host js/location) "/ws"))
 
 (defn start-event-loop []
   (go-loop [event (<! event-queue)]
@@ -29,10 +31,13 @@
 (defn mount [el]
   (rd/render [page] el))
 
+(defn start-game [el]
+  (mount el)
+  (start-event-loop))
+
 (defn mount-app-element []
   (when-let [el (get-app-element)]
-    (mount el)
-    (start-event-loop)))
+    (make-websocket! websocket-url (partial start-game el))))
 
 (mount-app-element)
 

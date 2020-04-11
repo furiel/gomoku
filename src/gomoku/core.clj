@@ -1,11 +1,12 @@
 (ns gomoku.core
   (:require
-   [org.httpkit.server :refer [run-server send! with-channel on-close on-receive]]
+   [gomoku.websockets :refer [wrap-ws]]
+   [org.httpkit.server :refer [run-server]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.util.response :refer [resource-response content-type]])
   (:gen-class))
 
-(defn handler [req]
+(defn root-handler [req]
   (or
    (when (= "/" (:uri req))
      (some-> (resource-response "index.html" {:root "public"})
@@ -14,7 +15,11 @@
     :headers {"Content-Type" "text/html"}
     :body "Not found"}))
 
+(defn default-handler []
+  (wrap-defaults root-handler site-defaults))
+
 (defn -main []
   (run-server
-   (wrap-defaults handler site-defaults)
+   (wrap-ws
+    (default-handler))
    {:port 3000}))
