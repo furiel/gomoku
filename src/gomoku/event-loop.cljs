@@ -8,13 +8,13 @@
 
 (defn start-event-loop []
   (go-loop [event (<! event-queue)]
-    (let [{{[x y] :point} :click} event]
-      (draw-me x y))
+    (let [{{[x y] :point who :player} :click} event]
+      (draw-me x y who))
     (recur (<! event-queue))))
 
-(defn click-event [x y]
+(defn click-event [x y who]
   (send-msg!
-   {:click {:player :x
+   {:click {:player who
             :point [x y]}}))
 
 (defn handle-message [msg]
