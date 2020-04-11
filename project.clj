@@ -8,6 +8,8 @@
                  [ring/ring-core "1.8.0"]
                  [http-kit "2.3.0"]
                  [com.bhauman/figwheel-main "0.2.3"]
+                 [com.cognitect/transit-clj "1.0.324"]
+                 [com.cognitect/transit-cljs "0.8.256"]
                  [org.clojure/core.async "1.1.587"]
                  [com.bhauman/rebel-readline-cljs "0.1.4"]
                  [reagent "0.10.0"]]
