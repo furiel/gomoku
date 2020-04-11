@@ -15,3 +15,5 @@
   (put! event-queue
         {:click {:player :x
                  :point [x y]}}))
+
+(defn handle-message [msg])

@@ -2,7 +2,7 @@
   (:require
    [reagent.dom :as rd]
    [reagent.core :as r]
-   [gomoku.event-loop :refer [start-event-loop click-event]]
+   [gomoku.event-loop :refer [start-event-loop click-event handle-message]]
    [gomoku.websockets :refer [make-websocket!]]
    [gomoku.board :refer [board]]))
 
@@ -26,7 +26,7 @@
 
 (defn mount-app-element []
   (when-let [el (get-app-element)]
-    (make-websocket! websocket-url (partial start-game el))))
+    (make-websocket! websocket-url (partial start-game el) handle-message)))
 
 (mount-app-element)
 
