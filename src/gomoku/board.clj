@@ -5,18 +5,20 @@
 
 (defn reset-game! [] (reset! game {:board {} :players {}}))
 
-(defn update-player-or-error [game channel player error]
-  (if (get-in game [:players channel])
-    (do (reset! error 'already-exists)
+(defn update-player-or-error [game channel error]
+  (if (some #{channel} (-> game :players keys))
+    (do (reset! error 'already-present)
         game)
-    (if (some #{player} (vals (:players game)))
-      (do (reset! error 'already-taken)
-          game)
-      (assoc-in game [:players channel] player))))
+    (let [current-players (set (-> {:players {1 :x}} :players vals))
+          player (first (apply disj #{:x :o} current-players))]
+      (if player
+        (assoc-in game [:players channel] player)
+        (do (reset! error 'too-many-players)
+            game)))))
 
-(defn add-player! [channel player]
+(defn add-player! [channel]
   (let [error (atom nil)
-        new (swap! game #(update-player-or-error %1 channel player error))]
+        new (swap! game #(update-player-or-error %1 channel error))]
     (if @error
       {:status 'nok :data @error}
       {:status 'ok :data new})))

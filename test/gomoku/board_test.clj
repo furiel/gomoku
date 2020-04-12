@@ -10,10 +10,9 @@
 
 (deftest board-test
   (testing "board-test"
-    (is (= 'ok (:status (add-player! 1 :x))))
-    (is (= {:status 'nok :data 'already-exists} (add-player! 1 :x)))
-    (is (= {:status 'nok :data 'already-taken} (add-player! 2 :x)))
-    (is (= 'ok (:status (add-player! 2 :o))))
+    (is (= 'ok (:status (add-player! 1))))
+    (is (= {:status 'nok :data 'already-present} (add-player! 1)))
+    (is (= 'ok (:status (add-player! 2))))
 
     (is (= 'ok (:status (move! 1 [1 1]))))
     (is (= {:status 'nok :data 'already-exists} (move! 1 [1 1])))
@@ -22,7 +21,7 @@
 
 (deftest test-remove-player
   (testing "remove-player"
-    (is (= 'ok (:status (add-player! 1 :x))))
-    (is (= 'ok (:status (add-player! 2 :o))))
+    (is (= 'ok (:status (add-player! 1))))
+    (is (= 'ok (:status (add-player! 2))))
     (remove-player! 1)
-    (is (= (:players @game) {2 :o}))))
+    (is (= (-> @game :players keys set) #{2}))))
