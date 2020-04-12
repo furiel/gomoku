@@ -6,6 +6,8 @@
    [ring.util.response :refer [resource-response content-type]])
   (:gen-class))
 
+(defonce server (atom nil))
+
 (defn root-handler [req]
   (or
    (when (= "/" (:uri req))
@@ -18,8 +20,14 @@
 (defn default-handler []
   (wrap-defaults root-handler site-defaults))
 
+(defn stop-server []
+  (when-not (nil? @server)
+    (@server :timeout 100)
+    (reset! server nil)))
+
 (defn -main []
-  (run-server
-   (wrap-ws
-    (default-handler))
-   {:port 3000}))
+  (reset! server
+          (run-server
+           (wrap-ws
+            (default-handler))
+           {:port 3000})))
