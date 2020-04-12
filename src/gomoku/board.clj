@@ -34,3 +34,6 @@
     (if @error
       {:status 'nok :data @error}
       {:status 'ok :data new})))
+
+(defn remove-player! [channel]
+  (swap! game update :players (fn [orig] (dissoc orig channel))))

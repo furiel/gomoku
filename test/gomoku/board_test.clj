@@ -19,3 +19,10 @@
     (is (= {:status 'nok :data 'already-exists} (move! 1 [1 1])))
     (is (= {:status 'nok :data 'already-exists} (move! 2 [1 1])))
     (is (= 'ok (:status (move! 2 [2 2]))))))
+
+(deftest test-remove-player
+  (testing "remove-player"
+    (is (= 'ok (:status (add-player! 1 :x))))
+    (is (= 'ok (:status (add-player! 2 :o))))
+    (remove-player! 1)
+    (is (= (:players @game) {2 :o}))))
