@@ -7,10 +7,10 @@
 
 (defn update-player-or-error [game channel player error]
   (if (get-in game [:players channel])
-    (do (reset! error "already exists")
+    (do (reset! error 'already-exists)
         game)
     (if (some #{player} (vals (:players game)))
-      (do (reset! error "player exists with another channel")
+      (do (reset! error 'already-taken)
           game)
       (assoc-in game [:players channel] player))))
 
@@ -18,8 +18,8 @@
   (let [error (atom nil)
         new (swap! game #(update-player-or-error %1 channel player error))]
     (if @error
-      ['nok "another player already exists"]
-      ['ok new])))
+      {:status 'nok :data @error}
+      {:status 'ok :data new})))
 
 (defn update-or-error [m k v error]
   (if (get m k)
@@ -32,5 +32,5 @@
         new (swap! game update :board
                    #(update-or-error %1 coords color error))]
     (if @error
-      ['nok "already exists"]
-      ['ok new])))
+      {:status 'nok :data @error}
+      {:status 'ok :data new})))

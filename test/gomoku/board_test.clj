@@ -10,12 +10,12 @@
 
 (deftest board-test
   (testing "board-test"
-    (is (= 'ok (first (add-player! 1 :x))))
-    (is (= 'nok (first (add-player! 1 :x))))
-    (is (= 'nok (first (add-player! 2 :x))))
-    (is (= 'ok (first (add-player! 2 :o))))
+    (is (= 'ok (:status (add-player! 1 :x))))
+    (is (= {:status 'nok :data 'already-exists} (add-player! 1 :x)))
+    (is (= {:status 'nok :data 'already-taken} (add-player! 2 :x)))
+    (is (= 'ok (:status (add-player! 2 :o))))
 
-    (is (= 'ok (first (move! 1 [1 1]))))
-    (is (= 'nok (first (move! 1 [1 1]))))
-    (is (= 'nok (first (move! 2 [1 1]))))
-    (is (= 'ok (first (move! 2 [2 2]))))))
+    (is (= 'ok (:status (move! 1 [1 1]))))
+    (is (= {:status 'nok :data 'already-exists} (move! 1 [1 1])))
+    (is (= {:status 'nok :data 'already-exists} (move! 2 [1 1])))
+    (is (= 'ok (:status (move! 2 [2 2]))))))
