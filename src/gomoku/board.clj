@@ -52,7 +52,7 @@
   (get (:players @game) channel))
 
 (defn display-message [channel]
-  {:display {:dimension [10 10] :player (channel-to-player channel) :next-player :o}})
+  {:event 'display :dimension [10 10] :player (channel-to-player channel) :next-player :o})
 
 (defn everyone-arrived? [data]
   (= 2 (count (get-channels-from-data data))))
@@ -64,8 +64,8 @@
 (defn handle-connect-event [channel]
   (let [{status :status data :data} (add-player! channel)]
     (let [msg (if (= status 'ok)
-                {:message "Successfully joined! Waiting for other players ..."}
-                {:message data})]
+                {:event 'message :message "Successfully joined! Waiting for other players ..."}
+                {:event 'message :message data})]
       (send-channel channel msg)
       (if (everyone-arrived? data)
         (send-display data)))))

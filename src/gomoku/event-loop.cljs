@@ -14,18 +14,18 @@
 
 (defn click-event [x y who]
   (send-msg!
-   {:click {:player who
-            :point [x y]}}))
+   {:event 'click :player who
+            :point [x y]}))
 
 (defn handle-click-event [event]
-  (let [{{[x y] :point who :player} :click} event]
+  (let [{[x y] :point who :player} event]
     (draw-me! x y who)))
 
 (defn get-board-element []
   (.getElementById js/document "board"))
 
 (defn handle-display-event [event]
-  (let [{{[x y] :dimension player :player next-player :next-player} :display} event]
+  (let [{[x y] :dimension player :player next-player :next-player} event]
     (set-player! player)
     (rd/render
      [(board {:dimension [x y] :on-click click-event})]
@@ -35,9 +35,9 @@
 (defn start-event-loop []
   (go-loop [event (<! event-queue)]
     (cond
-      (contains? event :click) (handle-click-event event)
-      (contains? event :display) (handle-display-event event)
-      (contains? event :message) nil
+      (= (:event event) 'click) (handle-click-event event)
+      (= (:event event) 'display) (handle-display-event event)
+      (= (:event event) 'message) nil
       :else (js/alert (str "Unknown event: " (-> event keys first))))
     (set-message! (:message event))
     (recur (<! event-queue))))
