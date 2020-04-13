@@ -1,7 +1,7 @@
 (ns gomoku.websockets
   (:require
    [cognitect.transit :as transit]
-   [gomoku.board :refer [add-player! remove-player! get-channels channel-to-player]]
+   [gomoku.board :refer [add-player! remove-player! get-channels channel-to-player display-message]]
    [org.httpkit.server :refer [send! with-channel on-close on-receive]])
   (:gen-class))
 
@@ -16,8 +16,10 @@
 
 (defn connect! [channel]
  (let [{status :status data :data} (add-player! channel)]
-   (when (= status 'ok)
-     (send! channel (write-msg {:display {:dimension [10 10] :player (channel-to-player channel) :next-player :o}})))))
+   (let [msg (if (= status 'ok)
+               (display-message channel)
+               {:message data})]
+     (send! channel (write-msg msg)))))
 
 (defn disconnect! [channel status]
   (remove-player! channel))

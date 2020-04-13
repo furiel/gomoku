@@ -45,3 +45,6 @@
 
 (defn channel-to-player [channel]
   (get (:players @game) channel))
+
+(defn display-message [channel]
+  {:display {:dimension [10 10] :player (channel-to-player channel) :next-player :o}})

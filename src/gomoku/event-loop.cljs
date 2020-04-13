@@ -37,6 +37,7 @@
     (cond
       (contains? event :click) (handle-click-event event)
       (contains? event :display) (handle-display-event event)
+      (contains? event :message) nil
       :else (js/alert (str "Unknown event: " (-> event keys first))))
     (set-message! (:message event))
     (recur (<! event-queue))))
