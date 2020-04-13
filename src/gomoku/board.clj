@@ -1,4 +1,6 @@
 (ns gomoku.board
+  (:require
+   [gomoku.websockets :refer [send-channel]])
   (:gen-class))
 
 (defonce game (atom {:board {} :players {}}))
@@ -54,3 +56,19 @@
 
 (defn everyone-arrived? [data]
   (= 2 (count (get-channels-from-data data))))
+
+(defn send-display [data]
+  (doseq [channel (get-channels-from-data data)]
+    (send-channel channel (display-message channel))))
+
+(defn handle-connect-event [channel]
+  (let [{status :status data :data} (add-player! channel)]
+    (let [msg (if (= status 'ok)
+                {:message "Successfully joined! Waiting for other players ..."}
+                {:message data})]
+      (send-channel channel msg)
+      (if (everyone-arrived? data)
+        (send-display data)))))
+
+(defn handle-disconnect-event [channel]
+  (remove-player! channel))

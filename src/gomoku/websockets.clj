@@ -1,9 +1,7 @@
 (ns gomoku.websockets
   (:require
+   [gomoku.event-loop :refer [put-event!]]
    [cognitect.transit :as transit]
-   [gomoku.board :refer [add-player! remove-player! get-channels
-                         channel-to-player display-message everyone-arrived?
-                         get-channels-from-data]]
    [org.httpkit.server :refer [send! with-channel on-close on-receive]])
   (:gen-class))
 
@@ -19,21 +17,11 @@
 (defn send-channel [channel msg]
   (send! channel (write-msg msg)))
 
-(defn send-display [data]
-  (doseq [channel (get-channels-from-data data)]
-    (send-channel channel (display-message channel))))
-
 (defn connect! [channel]
- (let [{status :status data :data} (add-player! channel)]
-   (let [msg (if (= status 'ok)
-               {:message "Successfully joined! Waiting for other players ..."}
-               {:message data})]
-     (send-channel channel msg)
-     (if (everyone-arrived? data)
-       (send-display data)))))
+  (put-event! {:event 'connect :channel channel}))
 
 (defn disconnect! [channel status]
-  (remove-player! channel))
+  (put-event! {:event 'disconnect! :channel channel}))
 
 (defn read-msg [transit-msg]
   (let [in (ByteArrayInputStream. (.getBytes transit-msg))

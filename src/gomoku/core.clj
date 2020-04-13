@@ -2,6 +2,7 @@
   (:require
    [gomoku.websockets :refer [wrap-ws]]
    [gomoku.board :refer [reset-game!]]
+   [gomoku.event-loop :refer [start-event-loop]]
    [org.httpkit.server :refer [run-server]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.util.response :refer [resource-response content-type]])
@@ -32,4 +33,5 @@
           (run-server
            (wrap-ws
             (default-handler))
-           {:port 3000})))
+           {:port 3000}))
+  (start-event-loop))
