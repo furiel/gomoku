@@ -33,11 +33,14 @@
   (doseq [channel (get-channels)]
     (send! channel (write-msg msg))))
 
+(defn read-event (channel msg)
+  (put-event! {:event 'read :channel channel :msg msg}))
+
 (defn ws-handler [request]
   (with-channel request channel
     (connect! channel)
     (on-close channel (partial disconnect! channel))
-    (on-receive channel #(notify-clients (read-msg %)))))
+    (on-receive #(read-event channel (read-msg %)))))
 
 (defn wrap-ws [handler]
   (fn [req]

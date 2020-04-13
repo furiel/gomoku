@@ -1,6 +1,6 @@
 (ns gomoku.board
   (:require
-   [gomoku.websockets :refer [send-channel]])
+   [gomoku.websockets :refer [send-channel notify-clients]])
   (:gen-class))
 
 (defonce game (atom {:board {} :players {}}))
@@ -72,3 +72,6 @@
 
 (defn handle-disconnect-event [channel]
   (remove-player! channel))
+
+(defn handle-read-event [channel msg]
+  (notify-clients msg))
