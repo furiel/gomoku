@@ -43,8 +43,14 @@
 (defn get-channels []
   (-> @game :players keys))
 
+(defn get-channels-from-data [d]
+  (-> d :players keys))
+
 (defn channel-to-player [channel]
   (get (:players @game) channel))
 
 (defn display-message [channel]
   {:display {:dimension [10 10] :player (channel-to-player channel) :next-player :o}})
+
+(defn everyone-arrived? [data]
+  (= 2 (count (get-channels-from-data data))))
