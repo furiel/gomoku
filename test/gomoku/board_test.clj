@@ -13,6 +13,7 @@
     (is (= 'ok (:status (add-player! 1))))
     (is (= {:status 'nok :data 'already-present} (add-player! 1)))
     (is (= 'ok (:status (add-player! 2))))
+    (is (not= (channel-to-player 1) (channel-to-player 2)))
 
     (is (= 'ok (:status (move! 1 [1 1]))))
     (is (= {:status 'nok :data 'already-exists} (move! 1 [1 1])))

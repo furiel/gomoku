@@ -9,7 +9,7 @@
   (if (some #{channel} (-> game :players keys))
     (do (reset! error 'already-present)
         game)
-    (let [current-players (set (-> {:players {1 :x}} :players vals))
+    (let [current-players (-> game :players vals set)
           player (first (apply disj #{:x :o} current-players))]
       (if player
         (assoc-in game [:players channel] player)
@@ -39,3 +39,9 @@
 
 (defn remove-player! [channel]
   (swap! game update :players (fn [orig] (dissoc orig channel))))
+
+(defn get-channels []
+  (-> @game :players keys))
+
+(defn channel-to-player [channel]
+  (get (:players @game) channel))

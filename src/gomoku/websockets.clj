@@ -1,24 +1,11 @@
 (ns gomoku.websockets
   (:require
    [cognitect.transit :as transit]
+   [gomoku.board :refer [add-player! remove-player! get-channels channel-to-player]]
    [org.httpkit.server :refer [send! with-channel on-close on-receive]])
   (:gen-class))
 
 (import [java.io ByteArrayInputStream ByteArrayOutputStream])
-
-(defonce channels (atom #{}))
-
-(defn connect! [channel]
- (swap! channels conj channel))
-
-(defn disconnect! [channel status]
- (swap! channels #(remove #{channel} %)))
-
-(defn read-msg [transit-msg]
-  (let [in (ByteArrayInputStream. (.getBytes transit-msg))
-        reader (transit/reader in :json)
-        msg (transit/read reader)]
-    msg))
 
 (defn write-msg [msg]
   (let [out (ByteArrayOutputStream. 4096)
@@ -27,8 +14,22 @@
     (let [transit-msg (.toString out)]
       transit-msg)))
 
+(defn connect! [channel]
+ (let [{status :status data :data} (add-player! channel)]
+   (when (= status 'ok)
+     (send! channel (write-msg {:display {:dimension [10 10] :player (channel-to-player channel) :next-player :o}})))))
+
+(defn disconnect! [channel status]
+  (remove-player! channel))
+
+(defn read-msg [transit-msg]
+  (let [in (ByteArrayInputStream. (.getBytes transit-msg))
+        reader (transit/reader in :json)
+        msg (transit/read reader)]
+    msg))
+
 (defn notify-clients [msg]
-  (doseq [channel @channels]
+  (doseq [channel (get-channels)]
     (send! channel (write-msg msg))))
 
 (defn ws-handler [request]

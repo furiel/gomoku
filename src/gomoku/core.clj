@@ -1,6 +1,7 @@
 (ns gomoku.core
   (:require
    [gomoku.websockets :refer [wrap-ws]]
+   [gomoku.board :refer [reset-game!]]
    [org.httpkit.server :refer [run-server]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.util.response :refer [resource-response content-type]])
@@ -26,6 +27,7 @@
     (reset! server nil)))
 
 (defn -main []
+  (reset-game!)
   (reset! server
           (run-server
            (wrap-ws

@@ -4,9 +4,12 @@
 
 (def player-to-color {:x "green" :o "red"})
 (def table (r/atom {}))
-(def player (r/atom :x))
+(def player (r/atom nil))
 
-(defn draw-me [x y who]
+(defn set-player! [p]
+  (reset! player p))
+
+(defn draw-me! [x y who]
   (swap! table assoc [x y] who))
 
 (defn cell [x y on-click]
@@ -29,16 +32,11 @@
           (cell n y0 on-click))))
 
 (defn board [{[x y] :dimension on-click :on-click}]
-  [:div
-
-   [:div
-    [:input {:type "radio" :name "player" :checked (= :x @player) :on-click #(reset! player :x)}]
-    [:label "green"]]
-   [:div
-    [:input {:type "radio" :name "player" :checked (= :o @player) :on-click #(reset! player :o)}]
-    [:label "red"]]
-
-   [:table
-    (into [:tbody]
-          (for [x0 (range x)]
-            (row x0 y on-click)))]])
+  (fn []
+    [:div
+     [:label (when @player "You are: ")]
+     [:label#player {:style {:color (player-to-color @player)}} (when @player (player-to-color @player))]
+     [:table
+      (into [:tbody]
+            (for [x0 (range x)]
+              (row x0 y on-click)))]]))

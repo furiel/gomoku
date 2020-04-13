@@ -12,17 +12,17 @@
     (.send @ws-chan (transit/write json-writer msg))
     (throw (js/Error. "Websocket is not available!"))))
 
-(defn wrap-json [handle-message]
+(defn wrap-json [message-handler]
   (fn [msg]
     (let [parsed (->> msg .-data (transit/read json-reader))]
-      (handle-message parsed))))
+      (message-handler parsed))))
 
-(defn make-websocket! [url start-game handle-message]
+(defn make-websocket! [url start-game message-handler]
   (if-let [chan (js/WebSocket. url)]
     (do
       (set! (.-onerror chan) (fn [error-event] (throw error-event)))
       (set! (.-onopen chan) (fn [event] (start-game)))
-      (set! (.-onmessage chan) (wrap-json handle-message))
+      (set! (.-onmessage chan) (wrap-json message-handler))
       (reset! ws-chan chan)
       (log "Websocket connection established with: " url))
     (throw (js/Error. "Websocket creation failed"))))

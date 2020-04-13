@@ -2,17 +2,16 @@
   (:require
    [reagent.dom :as rd]
    [reagent.core :as r]
-   [gomoku.event-loop :refer [start-event-loop click-event handle-message]]
-   [gomoku.websockets :refer [make-websocket!]]
-   [gomoku.board :refer [board]]))
+   [gomoku.event-loop :refer [start-event-loop click-event handle-message!]]
+   [gomoku.websockets :refer [make-websocket!]]))
 
 (def websocket-url (str "ws://" (.-host js/location) "/ws"))
 
 (defn page []
   [:div
-   [:div "Board"]
-   [:div (board {:dimension [10 10]
-                 :on-click click-event})]])
+   [:div [:h1 "Board"]]
+   [:label#message "Waiting for players!"]
+   [:div#board]])
 
 (defn get-app-element []
   (.getElementById js/document "app"))
@@ -26,7 +25,7 @@
 
 (defn mount-app-element []
   (when-let [el (get-app-element)]
-    (make-websocket! websocket-url (partial start-game el) handle-message)))
+    (make-websocket! websocket-url (partial start-game el) handle-message!)))
 
 (mount-app-element)
 
