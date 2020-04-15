@@ -1,8 +1,7 @@
 (ns gomoku.core
   (:require
-   [gomoku.websockets :refer [wrap-ws]]
-   [gomoku.board :refer [reset-game!]]
-   [gomoku.event-loop :refer [start-event-loop]]
+   [gomoku.websockets :refer [wrap-ws send-channel]]
+   [gomoku.event-loop :refer [start-new-game stop-game]]
    [org.httpkit.server :refer [run-server]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.util.response :refer [resource-response content-type]])
@@ -28,10 +27,14 @@
     (reset! server nil)))
 
 (defn -main []
-  (reset-game!)
+  (start-new-game {:notify send-channel})
   (reset! server
           (run-server
            (wrap-ws
             (default-handler))
-           {:port 3000}))
-  (start-event-loop))
+           {:port 3000})))
+
+(defn restart-server []
+  (stop-game)
+  (stop-server)
+  (-main))

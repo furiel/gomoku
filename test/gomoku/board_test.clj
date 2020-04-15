@@ -2,27 +2,19 @@
   (:require [clojure.test :refer :all]
             [gomoku.board :refer :all]))
 
-(defn setup [f]
-  (reset-game!)
-  (f))
+(deftest test-game
+  (testing "add-player"
+    (let [game (new-game (constantly nil))
+          with-player1 (add-player game 1)
+          do-not-readd-player1 (add-player (:next with-player1) 1)
+          with-player2 (add-player (:next do-not-readd-player1) 2)]
+      (is (= 'ok (:status with-player1)))
+      (is (= 'nok (:status do-not-readd-player1)))
+      (is (= 'already-present (:error do-not-readd-player1)))
+      (is (not= (channel-to-player (:next with-player2) 1) (channel-to-player (:next with-player2) 2)))))
 
-(clojure.test/use-fixtures :each setup)
-
-(deftest board-test
-  (testing "board-test"
-    (is (= 'ok (:status (add-player! 1))))
-    (is (= {:status 'nok :data 'already-present} (add-player! 1)))
-    (is (= 'ok (:status (add-player! 2))))
-    (is (not= (channel-to-player 1) (channel-to-player 2)))
-
-    (is (= 'ok (:status (move! 1 [1 1]))))
-    (is (= {:status 'nok :data 'already-exists} (move! 1 [1 1])))
-    (is (= {:status 'nok :data 'already-exists} (move! 2 [1 1])))
-    (is (= 'ok (:status (move! 2 [2 2]))))))
-
-(deftest test-remove-player
   (testing "remove-player"
-    (is (= 'ok (:status (add-player! 1))))
-    (is (= 'ok (:status (add-player! 2))))
-    (remove-player! 1)
-    (is (= (-> @game :players keys set) #{2}))))
+    (let [game (new-game (constantly nil))
+          everyone (:next (add-player (:next (add-player game 1)) 2))
+          remove-1 (remove-player everyone 1)]
+      (is (= (-> remove-1 :players keys set) #{2})))))

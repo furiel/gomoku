@@ -1,77 +1,72 @@
 (ns gomoku.board
-  (:require
-   [gomoku.websockets :refer [send-channel notify-clients]])
   (:gen-class))
 
-(defonce game (atom {:board {} :players {}}))
+(defn new-game [notify-player] {:notify notify-player :board {} :players {}})
 
-(defn reset-game! [] (reset! game {:board {} :players {}}))
+(defn notify! [game channel msg]
+  ((:notify game) channel msg))
 
-(defn update-player-or-error [game channel error]
+(defn update-player [game channel]
   (if (some #{channel} (-> game :players keys))
-    (do (reset! error 'already-present)
-        game)
+    {:status 'nok :error 'already-present :next game}
     (let [current-players (-> game :players vals set)
           player (first (apply disj #{:x :o} current-players))]
       (if player
-        (assoc-in game [:players channel] player)
-        (do (reset! error 'too-many-players)
-            game)))))
+        {:status 'ok :next (assoc-in game [:players channel] player)}
+        {:status 'nok :error 'too-many-players :next game}))))
 
-(defn add-player! [channel]
-  (let [error (atom nil)
-        new (swap! game #(update-player-or-error %1 channel error))]
-    (if @error
-      {:status 'nok :data @error}
-      {:status 'ok :data new})))
+(defn add-player [game channel]
+  (update-player game channel))
 
 (defn update-or-error [m k v error]
   (if (get m k)
     (do (reset! error 'already-exists) m)
     (assoc m k v)))
 
-(defn move! [channel coords]
-  (let [error (atom nil)
-        color (get-in @game [:players channel])
-        new (swap! game update :board
-                   #(update-or-error %1 coords color error))]
-    (if @error
-      {:status 'nok :data @error}
-      {:status 'ok :data new})))
+(defn move! [game channel coords]
+  (if (get game coords)
+    {:status 'nok :error 'already-exists :next game}
+    (let [color (get-in game [:players channel])]
+      {:status 'ok :next (update game :board
+                                 #(update %1 coords color))})))
 
-(defn remove-player! [channel]
-  (swap! game update :players (fn [orig] (dissoc orig channel))))
+(defn remove-player [game channel]
+  (update game :players (fn [orig] (dissoc orig channel))))
 
-(defn get-channels []
-  (-> @game :players keys))
+(defn get-channels [game]
+  (-> game :players keys))
 
-(defn get-channels-from-data [d]
-  (-> d :players keys))
+(defn channel-to-player [game channel]
+  (get (:players game) channel))
 
-(defn channel-to-player [channel]
-  (get (:players @game) channel))
+(defn display-message [game channel]
+  {:event 'display :dimension [10 10] :player (channel-to-player game channel) :next-player :o})
 
-(defn display-message [channel]
-  {:event 'display :dimension [10 10] :player (channel-to-player channel) :next-player :o})
+(defn everyone-arrived? [game]
+  (= 2 (count (get-channels game))))
 
-(defn everyone-arrived? [data]
-  (= 2 (count (get-channels-from-data data))))
+(defn send-display [game]
+  (doseq [channel (get-channels game)]
+    (notify! game channel (display-message game channel))))
 
-(defn send-display [data]
-  (doseq [channel (get-channels-from-data data)]
-    (send-channel channel (display-message channel))))
-
-(defn handle-connect-event [channel]
-  (let [{status :status data :data} (add-player! channel)]
+(defn handle-connect-event [game channel]
+  (let [result (add-player game channel)
+        {status :status error :error next-game :next} result]
     (let [msg (if (= status 'ok)
                 {:event 'message :message "Successfully joined! Waiting for other players ..."}
-                {:event 'message :message data})]
-      (send-channel channel msg)
-      (if (everyone-arrived? data)
-        (send-display data)))))
+                {:event 'message :message error})]
+      (notify! game channel msg)
+      (if (everyone-arrived? next-game)
+        (send-display next-game)))
+    next-game))
 
-(defn handle-disconnect-event [channel]
-  (remove-player! channel))
+(defn handle-disconnect-event [game channel]
+  (remove-player game channel))
 
-(defn handle-read-event [channel msg]
-  (notify-clients msg))
+(defn notify-clients [game msg]
+  (doseq [channel (get-channels game)]
+    (notify! game channel msg)))
+
+(defn handle-read-event [game channel msg]
+  (notify-clients game msg)
+  game)
