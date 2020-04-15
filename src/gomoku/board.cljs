@@ -22,7 +22,7 @@
             :height 20
             :background-color (let [player (get @table [x y])] (and player (player-to-color player)))
             }
-     :on-click #(on-click x y @player)
+     :on-click #(on-click x y)
     }
    ])
 

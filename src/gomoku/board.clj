@@ -68,5 +68,6 @@
     (notify! game channel msg)))
 
 (defn handle-read-event [game channel msg]
-  (notify-clients game msg)
-  game)
+  (let [player (channel-to-player game channel)]
+    (notify-clients game (assoc msg :player player))
+  game))

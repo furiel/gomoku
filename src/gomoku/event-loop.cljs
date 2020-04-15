@@ -12,10 +12,9 @@
 (defn set-message! [message]
   (rd/render message (.getElementById js/document "message")))
 
-(defn click-event [x y who]
+(defn click-event [x y]
   (send-msg!
-   {:event 'click :player who
-            :point [x y]}))
+   {:event 'click :point [x y]}))
 
 (defn handle-click-event [event]
   (let [{[x y] :point who :player} event]
@@ -29,7 +28,6 @@
     (set-player! player)
     (rd/render
      [(board {:dimension [x y] :on-click click-event})]
-
      (get-board-element))))
 
 (defn start-event-loop []
