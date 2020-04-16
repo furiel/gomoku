@@ -40,7 +40,7 @@
   (-> game :players keys))
 
 (defn display-message [game channel]
-  {:event 'display :dimension [10 10] :player (channel-to-player game channel) :next-player :o})
+  {:event 'display :dimension [10 10] :player (channel-to-player game channel) :next-player (:next-player game)})
 
 (defn everyone-arrived? [game]
   (= 2 (count (get-channels game))))
@@ -49,16 +49,25 @@
   (doseq [channel (get-channels game)]
     (notify! game channel (display-message game channel))))
 
+(defn other-player [game channel]
+  (first (vals (dissoc (:players game) channel))))
+
+(defn init-next-player [game channel]
+  (let [player (other-player game channel)]
+    (assoc game :next-player player)))
+
 (defn handle-connect-event [game channel]
   (let [result (add-player game channel)
         {status :status error :error next-game :next} result]
     (let [msg (if (= status 'ok)
                 {:event 'message :message "Successfully joined! Waiting for other players ..."}
-                {:event 'message :message error})]
+                {:event 'message :message error})
+          next-game (or (when (everyone-arrived? next-game)
+                          (init-next-player next-game channel)) next-game)]
       (notify! game channel msg)
       (if (everyone-arrived? next-game)
-        (send-display next-game)))
-    next-game))
+        (send-display next-game))
+      next-game)))
 
 (defn handle-disconnect-event [game channel]
   (remove-player game channel))
@@ -73,5 +82,5 @@
         next-game (:next moved)]
     (if (= 'nok (:status moved))
       (notify! next-game channel {:event 'message :message (:error moved)})
-      (notify-clients next-game (assoc msg :player player)))
+      (notify-clients next-game (assoc msg :player player :next-player (other-player game channel))))
   next-game))

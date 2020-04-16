@@ -5,9 +5,13 @@
 (def player-to-color {:x "green" :o "red"})
 (def table (r/atom {}))
 (def player (r/atom nil))
+(def next-player (r/atom nil))
 
 (defn set-player! [p]
   (reset! player p))
+
+(defn set-next-player! [p]
+  (reset! next-player p))
 
 (defn draw-me! [x y who]
   (swap! table assoc [x y] who))
@@ -34,8 +38,10 @@
 (defn board [{[x y] :dimension on-click :on-click}]
   (fn []
     [:div
-     [:label (when @player "You are: ")]
-     [:label#player {:style {:color (player-to-color @player)}} (when @player (player-to-color @player))]
+     [:div
+      [:label (when @player "You are: ")]
+      [:label#player {:style {:color (player-to-color @player)}} (when @player (player-to-color @player))]]
+     [:div [:label (if (= @next-player @player) "Your turn!" "Waiting for other player to move!")]]
      [:table
       (into [:tbody]
             (for [x0 (range x)]

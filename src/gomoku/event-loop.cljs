@@ -2,7 +2,7 @@
   (:require
    [reagent.dom :as rd]
    [reagent.core :as r]
-   [gomoku.board :refer [board set-player!]]
+   [gomoku.board :refer [board set-player! set-next-player!]]
    [cljs.core.async :refer [chan put! <! go go-loop]]
    [gomoku.websockets :refer [send-msg!]]
    [gomoku.board :refer [draw-me!]]))
@@ -17,7 +17,8 @@
    {:event 'click :point [x y]}))
 
 (defn handle-click-event [event]
-  (let [{[x y] :point who :player} event]
+  (let [{[x y] :point who :player next-player :next-player} event]
+    (set-next-player! next-player)
     (draw-me! x y who)))
 
 (defn get-board-element []
@@ -26,6 +27,7 @@
 (defn handle-display-event [event]
   (let [{[x y] :dimension player :player next-player :next-player} event]
     (set-player! player)
+    (set-next-player! next-player)
     (rd/render
      [(board {:dimension [x y] :on-click click-event})]
      (get-board-element))))
