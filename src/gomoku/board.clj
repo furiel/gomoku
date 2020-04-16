@@ -23,21 +23,21 @@
     (do (reset! error 'already-exists) m)
     (assoc m k v)))
 
+(defn channel-to-player [game channel]
+  (get (:players game) channel))
+
 (defn move! [game channel coords]
-  (if (get game coords)
+  (if (get (:board game) coords)
     {:status 'nok :error 'already-exists :next game}
-    (let [color (get-in game [:players channel])]
+    (let [color (channel-to-player game channel)]
       {:status 'ok :next (update game :board
-                                 #(update %1 coords color))})))
+                                 #(assoc %1 coords color))})))
 
 (defn remove-player [game channel]
   (update game :players (fn [orig] (dissoc orig channel))))
 
 (defn get-channels [game]
   (-> game :players keys))
-
-(defn channel-to-player [game channel]
-  (get (:players game) channel))
 
 (defn display-message [game channel]
   {:event 'display :dimension [10 10] :player (channel-to-player game channel) :next-player :o})
