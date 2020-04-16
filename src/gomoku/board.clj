@@ -76,11 +76,23 @@
   (doseq [channel (get-channels game)]
     (notify! game channel msg)))
 
-(defn handle-read-event [game channel msg]
+(defn execute-move-command [game channel msg]
   (let [player (channel-to-player game channel)
-        moved (move! game channel (:point msg))
+        updated-game (assoc game :next-player (other-player game channel))]
+    (notify-clients updated-game (assoc msg :player player :next-player (:next-player updated-game)))
+    updated-game))
+
+(defn handle-move-command [game channel msg]
+  (let [moved (move! game channel (:point msg))
         next-game (:next moved)]
     (if (= 'nok (:status moved))
-      (notify! next-game channel {:event 'message :message (:error moved)})
-      (notify-clients next-game (assoc msg :player player :next-player (other-player game channel))))
-  next-game))
+        (do (notify! next-game channel {:event 'message :message (:error moved)})
+            next-game)
+        (execute-move-command game channel msg))))
+
+(defn handle-read-event [game channel msg]
+  (if (= (:next-player game) (channel-to-player game channel))
+    (handle-move-command game channel msg)
+    (do
+      (notify! game channel {:event 'message :message 'not-your-turn})
+      game)))
