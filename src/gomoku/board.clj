@@ -88,7 +88,7 @@
     (if (= 'nok (:status moved))
         (do (notify! next-game channel {:event 'message :message (:error moved)})
             next-game)
-        (execute-move-command game channel msg))))
+        (execute-move-command next-game channel msg))))
 
 (defn handle-read-event [game channel msg]
   (if (= (:next-player game) (channel-to-player game channel))
