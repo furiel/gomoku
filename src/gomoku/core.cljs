@@ -10,7 +10,7 @@
 (defn page []
   [:div
    [:div [:h1 "Board"]]
-   [:label#message "Waiting for server ..."]
+   [:div {:style {:height 20}}[:label#message  "Waiting for server ..."]]
    [:div#board]])
 
 (defn get-app-element []

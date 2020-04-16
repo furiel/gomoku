@@ -68,6 +68,10 @@
     (notify! game channel msg)))
 
 (defn handle-read-event [game channel msg]
-  (let [player (channel-to-player game channel)]
-    (notify-clients game (assoc msg :player player))
-  game))
+  (let [player (channel-to-player game channel)
+        moved (move! game channel (:point msg))
+        next-game (:next moved)]
+    (if (= 'nok (:status moved))
+      (notify! next-game channel {:event 'message :message (:error moved)})
+      (notify-clients next-game (assoc msg :player player)))
+  next-game))
