@@ -1,7 +1,7 @@
 (ns gomoku.core
   (:require
    [gomoku.websockets :refer [wrap-ws send-channel]]
-   [gomoku.event-loop :refer [start-new-game stop-game]]
+   [gomoku.event-loop :refer [start-new-game stop-game inspect!]]
    [org.httpkit.server :refer [run-server]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.util.response :refer [resource-response content-type]])

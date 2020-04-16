@@ -9,9 +9,17 @@
 (defn put-event! [event]
   (put! @event-queue event))
 
+(defn inspect! []
+  (put! @event-queue {:event 'inspect}))
+
+(defn handle-inspect-event [game]
+  (println game)
+  game)
+
 (defn dispatch-on-event [game event]
   (cond
     (= (:event event) 'connect) (handle-connect-event game (:channel event))
+    (= (:event event) 'inspect) (handle-inspect-event game)
     (= (:event event) 'disconnect) (handle-disconnect-event game (:channel event))
     (= (:event event) 'read) (handle-read-event game (:channel event) (:msg event))
     :else (throw (Exception. (str "Unknown event:" event " game: " game)))))
