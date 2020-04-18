@@ -76,11 +76,34 @@
   (doseq [channel (get-channels game)]
     (notify! game channel msg)))
 
+(defn direction [x0 y0 dx dy]
+  (lazy-seq (cons [x0 y0] (direction (+ x0 dx) (+ y0 dy) dx dy))))
+
+(defn inverse [x0 y0 dx dy]
+  [x0 y0 (- dx) (- dy)])
+
+(defn get-line [game color line]
+  (letfn [(same-color [coord] (= color (get (:board game) coord)))]
+    (clojure.set/union
+     (set (take-while same-color (apply direction line)))
+     (set (take-while same-color (apply direction (apply inverse line)))))))
+
+(defn winning-move? [game channel coords]
+  (let [color (channel-to-player game channel)
+        lines (map #(into coords %1) '([0 1] [1 0] [1 1] [-1 1]))
+        candidates (map (partial get-line game color) lines)
+        largest (apply max-key count candidates)]
+    (if (>= (count largest) 5)
+      largest
+      nil)))
+
 (defn execute-move-command [game channel msg]
   (let [player (channel-to-player game channel)
         updated-game (assoc game :next-player (other-player game channel))]
     (notify-clients updated-game (assoc msg :player player :next-player (:next-player updated-game)))
-    updated-game))
+    (when (winning-move? updated-game channel (:point msg))
+      (notify-clients updated-game {:event 'message :message "GG"}))
+      updated-game))
 
 (defn handle-move-command [game channel msg]
   (let [moved (move! game channel (:point msg))
