@@ -19,11 +19,6 @@
 (defn add-player [game channel]
   (update-player game channel))
 
-(defn update-or-error [m k v error]
-  (if (get m k)
-    (do (reset! error 'already-exists) m)
-    (assoc m k v)))
-
 (defn channel-to-player [game channel]
   (get (:players game) channel))
 
