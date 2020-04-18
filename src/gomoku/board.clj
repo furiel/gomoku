@@ -1,4 +1,5 @@
 (ns gomoku.board
+  (:require [clojure.set])
   (:gen-class))
 
 (defn new-game [notify-player] {:notify notify-player :board {} :players {}})
