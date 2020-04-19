@@ -4,17 +4,19 @@
 
 (defn new-game [notify-player] {:notify notify-player :board {} :players {}})
 
+(def error? symbol?)
+
 (defn notify! [game channel msg]
   ((:notify game) channel msg))
 
 (defn update-player [game channel]
   (if (some #{channel} (-> game :players keys))
-    {:status 'nok :error 'already-present :next game}
+    'already-present
     (let [current-players (-> game :players vals set)
           player (first (apply disj #{:x :o} current-players))]
       (if player
-        {:status 'ok :next (assoc-in game [:players channel] player)}
-        {:status 'nok :error 'too-many-players :next game}))))
+        (assoc-in game [:players channel] player)
+        'too-many-players))))
 
 (defn add-player [game channel]
   (update-player game channel))
@@ -53,17 +55,17 @@
     (assoc game :next-player player)))
 
 (defn handle-connect-event [game channel]
-  (let [result (add-player game channel)
-        {status :status error :error next-game :next} result]
-    (let [msg (if (= status 'ok)
-                {:event 'message :message "Successfully joined! Waiting for other players ..."}
-                {:event 'message :message error})
-          next-game (or (when (everyone-arrived? next-game)
-                          (init-next-player next-game channel)) next-game)]
+  (let [player-added (add-player game channel)]
+    (let [msg (if (error? player-added)
+                {:event 'message :message player-added}
+                {:event 'message :message "Successfully joined! Waiting for other players ..."})
+          game (if (error? player-added) game player-added)
+          game (or (when (everyone-arrived? game)
+                     (init-next-player game channel)) game)]
       (notify! game channel msg)
-      (if (everyone-arrived? next-game)
-        (send-display next-game))
-      next-game)))
+      (if (everyone-arrived? game)
+        (send-display game))
+      game)))
 
 (defn handle-disconnect-event [game channel]
   (remove-player game channel))
