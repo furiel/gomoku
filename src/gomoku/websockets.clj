@@ -1,6 +1,6 @@
 (ns gomoku.websockets
   (:require
-   [gomoku.event-loop :refer [put-event!]]
+   [gomoku.board :refer [put-event!]]
    [cognitect.transit :as transit]
    [org.httpkit.server :refer [send! with-channel on-close on-receive open?]])
   (:gen-class))
@@ -17,11 +17,11 @@
 (defn send-channel [channel msg]
   (send! channel (write-msg msg)))
 
-(defn connect! [channel]
-  (put-event! {:event 'connect :channel channel}))
+(defn connect! [game channel]
+  (put-event! game {:event 'connect :channel channel}))
 
-(defn disconnect! [channel status]
-  (put-event! {:event 'disconnect :channel channel}))
+(defn disconnect! [game channel status]
+  (put-event! game {:event 'disconnect :channel channel}))
 
 (defn read-msg [transit-msg]
   (let [in (ByteArrayInputStream. (.getBytes transit-msg))
@@ -29,17 +29,17 @@
         msg (transit/read reader)]
     msg))
 
-(defn read-event [channel msg]
-  (put-event! {:event 'read :channel channel :msg msg}))
+(defn read-event [game channel msg]
+  (put-event! game {:event 'read :channel channel :msg msg}))
 
-(defn ws-handler [request]
+(defn ws-handler [game request]
   (with-channel request channel
-    (connect! channel)
-    (on-close channel (partial disconnect! channel))
-    (on-receive channel #(read-event channel (read-msg %)))))
+    (connect! game channel)
+    (on-close channel (partial disconnect! game channel))
+    (on-receive channel #(read-event game channel (read-msg %)))))
 
-(defn wrap-ws [handler]
+(defn wrap-ws [game handler]
   (fn [req]
     (if (clojure.string/starts-with? (:uri req) "/ws")
-      (ws-handler req)
+      (ws-handler game req)
       (handler req))))

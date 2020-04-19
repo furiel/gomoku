@@ -1,5 +1,6 @@
 (ns gomoku.board
-  (:require [clojure.set])
+  (:require [clojure.set]
+            [gomoku.event-loop :refer [start-event-loop stop-event-loop] :as event-loop])
   (:gen-class))
 
 (defn new-game [notify-player] {:notify notify-player :board {} :players {}})
@@ -54,8 +55,9 @@
   (let [player (other-player game channel)]
     (assoc game :next-player player)))
 
-(defn handle-connect-event [game channel]
-  (let [player-added (add-player game channel)]
+(defn handle-connect-event [game event]
+  (let [channel (:channel event)
+        player-added (add-player game channel)]
     (let [msg (if (error? player-added)
                 {:event 'message :message player-added}
                 {:event 'message :message "Successfully joined! Waiting for other players ..."})
@@ -67,8 +69,8 @@
         (send-display game))
       game)))
 
-(defn handle-disconnect-event [game channel]
-  (remove-player game channel))
+(defn handle-disconnect-event [game event]
+  (remove-player game (:channel event)))
 
 (defn notify-clients [game msg]
   (doseq [channel (get-channels game)]
@@ -110,9 +112,24 @@
           game)
       (execute-move-command moved channel msg))))
 
-(defn handle-read-event [game channel msg]
-  (if (= (:next-player game) (channel-to-player game channel))
-    (handle-move-command game channel msg)
-    (do
-      (notify! game channel {:event 'message :message 'not-your-turn})
-      game)))
+(defn handle-read-event [game event]
+  (let [{channel :channel msg :msg} event]
+    (if (= (:next-player game) (channel-to-player game channel))
+      (handle-move-command game channel msg)
+      (do
+        (notify! game channel {:event 'message :message 'not-your-turn})
+        game))))
+
+(defn start-new-game [callbacks]
+  (start-event-loop
+   (new-game (:notify callbacks))
+   {'connect handle-connect-event
+    'disconnect handle-disconnect-event
+    'read handle-read-event}))
+
+(defn stop-game [event-loop]
+  (when event-loop
+    (stop-event-loop event-loop)))
+
+(defn put-event! [game event]
+  (event-loop/put-event! game event))
