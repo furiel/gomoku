@@ -1,6 +1,6 @@
 (ns gomoku.board
   (:require [clojure.set]
-            [gomoku.event-loop :refer [start-event-loop stop-event-loop] :as event-loop])
+            [gomoku.event-loop :refer [start-event-loop stop-event-loop sync-event-loop] :as event-loop])
   (:gen-class))
 
 (defn new-game [notify-player] {:notify notify-player :board {} :players {}})
@@ -133,3 +133,6 @@
 
 (defn put-event! [game event]
   (event-loop/put-event! game event))
+
+(defn sync-game [game]
+  (sync-event-loop game))
