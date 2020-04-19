@@ -24,7 +24,7 @@
 (defn channel-to-player [game channel]
   (get (:players game) channel))
 
-(defn move! [game channel coords]
+(defn move [game channel coords]
   (if (get (:board game) coords)
     {:status 'nok :error 'already-exists :next game}
     (let [color (channel-to-player game channel)]
@@ -104,7 +104,7 @@
       updated-game))
 
 (defn handle-move-command [game channel msg]
-  (let [moved (move! game channel (:point msg))
+  (let [moved (move game channel (:point msg))
         next-game (:next moved)]
     (if (= 'nok (:status moved))
         (do (notify! next-game channel {:event 'message :message (:error moved)})

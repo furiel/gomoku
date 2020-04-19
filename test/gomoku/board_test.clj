@@ -30,11 +30,11 @@
   (testing "move"
     (let [game (new-game (constantly nil))
           everyone (add-player (add-player game 1) 2)]
-      (let [first-move (move! everyone 1 [1 1])
-            already-occupied-1 (move! (:next first-move) 1 [1 1])
-            already-occupied-2 (move! (:next already-occupied-1) 2 [1 1])
-            ok-1 (move! (:next already-occupied-2) 1 [2 2])
-            ok-2 (move! (:next ok-1) 2 [3 3])]
+      (let [first-move (move everyone 1 [1 1])
+            already-occupied-1 (move (:next first-move) 1 [1 1])
+            already-occupied-2 (move (:next already-occupied-1) 2 [1 1])
+            ok-1 (move (:next already-occupied-2) 1 [2 2])
+            ok-2 (move (:next ok-1) 2 [3 3])]
         (is (= 'ok (:status first-move)))
         (is (= 'ok (:status ok-1)))
         (is (= 'ok (:status ok-2)))
