@@ -2,6 +2,11 @@
   (:require [clojure.test :refer :all]
             [gomoku.board :refer :all]))
 
+(defn- with-all-players []
+  (let [game (new-game (constantly nil))
+        with-everyone (add-player (add-player game 1) 2)]
+    with-everyone))
+
 (deftest test-game
   (testing "add-player-simple"
     (let [game (new-game (constantly nil))
@@ -27,18 +32,20 @@
           remove-1 (remove-player everyone 1)]
       (is (= (-> remove-1 :players keys set) #{2}))))
 
-  (testing "move"
-    (let [game (new-game (constantly nil))
-          everyone (add-player (add-player game 1) 2)]
-      (let [first-move (move everyone 1 [1 1])
-            already-occupied-1 (move (:next first-move) 1 [1 1])
-            already-occupied-2 (move (:next already-occupied-1) 2 [1 1])
-            ok-1 (move (:next already-occupied-2) 1 [2 2])
-            ok-2 (move (:next ok-1) 2 [3 3])]
-        (is (= 'ok (:status first-move)))
-        (is (= 'ok (:status ok-1)))
-        (is (= 'ok (:status ok-2)))
-        (is (= 'nok (:status already-occupied-1)))
-        (is (= 'nok (:status already-occupied-2)))
-        (is (= 'already-exists (:error already-occupied-1)))
-        (is (= 'already-exists (:error already-occupied-2)))))))
+  (testing "move-simple"
+    (let [game (with-all-players)
+          first-move (move game 1 [1 1])
+          second-move (move first-move 2 [2 2])]
+      (is (not (error? first-move)))
+      (is (contains? (:board first-move [1 1]) [1 1]))
+      (is (not (error? second-move)))
+      (is (contains? (:board second-move [1 1]) [1 1]))
+      (is (contains? (:board second-move [2 2]) [1 1]))))
+
+  (testing "already-occupied"
+    (let [game (with-all-players)
+          first-move (move game 1 [1 1])
+          already-occupied-1 (move first-move 1 [1 1])
+          already-occupied-2 (move first-move 2 [1 1])]
+      (is (= 'already-exists already-occupied-1))
+      (is (= 'already-exists already-occupied-2)))))

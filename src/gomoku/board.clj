@@ -26,10 +26,10 @@
 
 (defn move [game channel coords]
   (if (get (:board game) coords)
-    {:status 'nok :error 'already-exists :next game}
+    'already-exists
     (let [color (channel-to-player game channel)]
-      {:status 'ok :next (update game :board
-                                 #(assoc %1 coords color))})))
+      (update game :board
+              #(assoc %1 coords color)))))
 
 (defn remove-player [game channel]
   (update game :players (fn [orig] (dissoc orig channel))))
@@ -104,12 +104,11 @@
       updated-game))
 
 (defn handle-move-command [game channel msg]
-  (let [moved (move game channel (:point msg))
-        next-game (:next moved)]
-    (if (= 'nok (:status moved))
-        (do (notify! next-game channel {:event 'message :message (:error moved)})
-            next-game)
-        (execute-move-command next-game channel msg))))
+  (let [moved (move game channel (:point msg))]
+    (if (error? moved)
+      (do (notify! game channel {:event 'message :message moved})
+          game)
+      (execute-move-command moved channel msg))))
 
 (defn handle-read-event [game channel msg]
   (if (= (:next-player game) (channel-to-player game channel))
