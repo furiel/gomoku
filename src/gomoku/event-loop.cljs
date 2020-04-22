@@ -2,8 +2,8 @@
   (:require
    [reagent.dom :as rd]
    [reagent.core :as r]
-   [gomoku.board :refer [board set-player! set-next-player!]]
-   [cljs.core.async :refer [chan put! <! go go-loop]]
+   [gomoku.board :refer [board set-player! set-next-player! player]]
+   [cljs.core.async :refer [chan put! <! go go-loop close!]]
    [gomoku.websockets :refer [send-msg!]]
    [gomoku.board :refer [draw-me!]]))
 
@@ -32,15 +32,22 @@
      [(board {:dimension [x y] :on-click click-event})]
      (get-board-element))))
 
+(defn handle-game-finished [event event-queue]
+  (set-message! (str "Game finished. " (if (= @player (:winner event)) "You" "The other player") " won!"))
+  (set-next-player! nil)
+  (close! event-queue))
+
 (defn start-event-loop []
   (go-loop [event (<! event-queue)]
     (cond
       (= (:event event) 'click) (handle-click-event event)
       (= (:event event) 'display) (handle-display-event event)
       (= (:event event) 'message) nil
-      :else (js/alert (str "Unknown event: " (-> event keys first))))
-    (set-message! (:message event))
-    (recur (<! event-queue))))
+      (= (:event event) 'game-finished) (handle-game-finished event event-queue)
+      :else (js/alert (str "Unknown event: " (:event event))))
+    (when (not= (:event event) 'game-finished)
+      (set-message! (:message event))
+      (recur (<! event-queue)))))
 
 (defn handle-message! [msg]
   (put! event-queue msg))

@@ -101,9 +101,10 @@
   (let [player (channel-to-player game channel)
         updated-game (assoc game :next-player (other-player game channel))]
     (notify-clients updated-game (assoc msg :player player :next-player (:next-player updated-game)))
-    (when (winning-move? updated-game channel (:point msg))
-      (notify-clients updated-game {:event 'message :message "GG"}))
-      updated-game))
+    (if (winning-move? updated-game channel (:point msg))
+      (do (notify-clients updated-game {:event 'game-finished :winner player})
+          'imminent-shutdown)
+      updated-game)))
 
 (defn handle-move-command [game channel msg]
   (let [moved (move game channel (:point msg))]

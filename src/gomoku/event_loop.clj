@@ -19,5 +19,7 @@
           (throw (Exception. (str "Unknown event:" event " state: " state))))
         (let [event-handler (get event-handlers (:event event))
               next-state (event-handler state event)]
-          (recur (<! event-loop) next-state))))
+          (if (not= next-state 'imminent-shutdown)
+            (recur (<! event-loop) next-state)
+            (stop-event-loop event-loop)))))
     event-loop))

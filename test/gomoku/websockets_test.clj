@@ -36,7 +36,7 @@
       (is (= (:event (pop-message! q1)) 'click))
       (is (= (:event (pop-message! q2)) 'click))
 
-      (is (= (:message (pop-message! q1)) "GG"))
-      (is (= (:message (pop-message! q2)) "GG"))
+      (is (= (:event (pop-message! q1)) 'game-finished))
+      (is (= (:event (pop-message! q2)) 'game-finished))
 
       (stop-game game))))

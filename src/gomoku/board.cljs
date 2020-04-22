@@ -41,7 +41,7 @@
      [:div
       [:label (when @player "You are: ")]
       [:label#player {:style {:color (player-to-color @player)}} (when @player (player-to-color @player))]]
-     [:div [:label (if (= @next-player @player) "Your turn!" "Waiting for other player to move!")]]
+     [:div [:label (when @next-player (if (= @next-player @player) "Your turn!" "Waiting for other player to move!"))]]
      [:table
       (into [:tbody]
             (for [x0 (range x)]
