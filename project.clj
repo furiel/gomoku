@@ -13,7 +13,8 @@
                  [org.clojure/core.async "1.1.587"]
                  [com.bhauman/rebel-readline-cljs "0.1.4"]
                  [reagent "0.10.0"]]
-  :aliases {"fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]}
+  :aliases {"fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
+            "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
   :main ^:skip-aot gomoku.core
   :target-path "target/%s"
   :resource-paths ["target" "resources"]
