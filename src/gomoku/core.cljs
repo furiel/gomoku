@@ -5,12 +5,12 @@
    [gomoku.event-loop :refer [start-event-loop click-event handle-message!]]
    [gomoku.websockets :refer [make-websocket!]]))
 
-(def websocket-url (str "ws://" (.-host js/location) "/ws"))
+(def websocket-url (str "ws://" (.-host js/location) "/ws" (.-search js/location)))
 
 (defn page []
   [:div
    [:div [:h1 "Board"]]
-   [:div {:style {:height 20}}[:label#message  "Waiting for server ..."]]
+   [:div {:style {:height 20}} [:label#message "Waiting for server ..."]]
    [:div#board]])
 
 (defn get-app-element []
@@ -30,5 +30,4 @@
 (mount-app-element)
 
 (defn ^:after-load on-reload []
-  (mount-app-element)
-)
+  (mount-app-element))

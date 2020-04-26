@@ -59,7 +59,7 @@
       @error
       (get updated-games id))))
 
-(defn ws-handler [id request]
+(defn connect-user [id request]
   (with-channel request channel
     (let [new-game (update-games! id channel)]
       (assert new-game)
@@ -69,8 +69,15 @@
           (on-close channel (partial disconnect! game channel))
           (on-receive channel #(read-event game channel (read-msg %))))))))
 
+(defn ws-handler [req]
+  (if-let [id (get-in req [:params "id"])]
+    (connect-user id req)
+    {:status 404
+     :headers {"Content-Type" "text/html"}
+     :body "invalid request: missing id"}))
+
 (defn wrap-ws [handler]
   (fn [req]
     (if (clojure.string/starts-with? (:uri req) "/ws")
-      (ws-handler 1 req)
+      (ws-handler req)
       (handler req))))

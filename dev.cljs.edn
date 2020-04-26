@@ -1,2 +1,2 @@
-^{:open-url "http://localhost:3000"}
+^{:open-url "http://localhost:3000?id=1"}
 {:main gomoku.core}
