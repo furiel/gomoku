@@ -46,11 +46,13 @@
 (defn update-games-or-set-error [id channel error]
   (swap! games
           (fn [games]
-            (let [game (get-game games id)
-                  updated-game (add-player game channel)]
-              (if (error? updated-game)
-                (do (reset! error updated-game) games)
-                (assoc games id updated-game))))))
+            (if (> (count games) 100)
+              (do (reset! error 'too-many-games) games)
+              (let [game (get-game games id)
+                    updated-game (add-player game channel)]
+                (if (error? updated-game)
+                  (do (reset! error updated-game) games)
+                  (assoc games id updated-game)))))))
 
 (defn update-games! [id channel]
   (let [error (atom nil)
