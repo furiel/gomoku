@@ -1,5 +1,6 @@
 (ns gomoku.board-test
   (:require [clojure.test :refer :all]
+            [gomoku.lib :refer [error?]]
             [gomoku.board :refer :all]))
 
 (defn- with-all-players []

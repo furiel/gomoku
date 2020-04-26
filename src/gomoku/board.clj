@@ -1,11 +1,10 @@
 (ns gomoku.board
   (:require [clojure.set]
+            [gomoku.lib :refer [error?]]
             [gomoku.event-loop :refer [start-event-loop stop-event-loop] :as event-loop])
   (:gen-class))
 
 (defn new-game [notify-player] {:notify notify-player :board {} :players {}})
-
-(def error? symbol?)
 
 (defn notify! [game channel msg]
   ((:notify game) channel msg))
