@@ -1,0 +1,11 @@
+version: '3'
+services:
+  gomoku:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/gomoku
+    image: "clojure:openjdk-8-lein"
+    working_dir: /gomoku
+    entrypoint: /bin/bash -c "lein fig:min; lein run"
