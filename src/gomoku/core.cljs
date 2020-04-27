@@ -5,7 +5,12 @@
    [gomoku.event-loop :refer [start-event-loop click-event handle-message!]]
    [gomoku.websockets :refer [make-websocket!]]))
 
-(def websocket-url (str "ws://" (.-host js/location) "/ws" (.-search js/location)))
+(defn ws []
+  (if (= (.-protocol js/location) "https:")
+    "wss://"
+    "ws://"))
+
+(def websocket-url (str (ws) (.-host js/location) "/ws" (.-search js/location)))
 
 (defn page []
   [:div
