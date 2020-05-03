@@ -6,22 +6,26 @@
    [org.httpkit.server :refer [run-server]])
   (:gen-class))
 
-(defonce server (atom nil))
+(defonce server (atom {}))
+
+(defn start-server [port]
+  (reset! server
+          {:server (run-server
+                    (route)
+                    {:port port})
+           :port port}))
 
 (defn stop-server []
-  (when-not (nil? @server)
+  (when (:server @server)
     (info "stopping server")
-    (@server :timeout 100)
-    (reset! server nil)))
-
-(defn -main []
-  (reset! server
-          (run-server
-           (route)
-           {:port 3000}))
-  (info "gomoku server started"))
+    ((:server @server) :timeout 100)
+    (swap! server assoc :server nil)))
 
 (defn restart-server []
   (info "restarting server")
   (stop-server)
-  (-main))
+  (start-server (:port @server)))
+
+(defn -main [& args]
+  (start-server 3000)
+  (info "gomoku server started"))
