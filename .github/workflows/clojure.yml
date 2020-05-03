@@ -10,10 +10,12 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    timeout-minutes: 5
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: lein deps
+    - name: build uberjar
+      run: lein uberjar
     - name: Run tests
       run: lein test
