@@ -43,11 +43,15 @@
 (defn -main [& args]
   (let [cli-arguments (parse-opts args cli-options)]
     (if-let [errors (:errors cli-arguments)]
-      (doseq [err errors]
-        (println err))
+      (do
+        (doseq [err errors]
+          (println err))
+        (System/exit 1))
         (let [options (:options cli-arguments)]
           (if (:help options)
-            (println (format "Options:\n%s" (:summary cli-arguments)))
+            (do
+              (println (format "Options:\n%s" (:summary cli-arguments)))
+              (System/exit 1))
             (do
               (set-level! (:log-level options))
               (start-server (:port options))
