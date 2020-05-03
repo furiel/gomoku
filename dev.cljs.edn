@@ -1,2 +1,6 @@
 ^{:open-url "http://localhost:3000?id=1"}
-{:main gomoku.core}
+{:main gomoku.core
+ :output-to "target/js/public/main.js"
+ :output-dir "target/js/public/dev/"
+ :asset-path "dev"
+ :optimizations :none}

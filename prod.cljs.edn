@@ -1,0 +1,4 @@
+{:main gomoku.core
+ :output-to "target/js/public/main.js"
+ :output-dir "target/js-build/"
+ :optimizations :advanced}

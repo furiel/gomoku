@@ -14,9 +14,10 @@
                  [com.bhauman/rebel-readline-cljs "0.1.4"]
                  [reagent "0.10.0"]]
   :aliases {"fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
-            "fig:min"   ["run" "-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+            "fig:min"   ["run" "-m" "figwheel.main" "--build-once" "prod"]}
   :main ^:skip-aot gomoku.core
-  :clean-targets ^{:protect false} [:target-path]
   :target-path "target/%s"
-  :resource-paths ["target" "resources"]
-  :profiles {:uberjar {:aot :all}})
+  :resource-paths ["target/js" "resources"]
+  :profiles {:uberjar {:aot :all
+                       :omit-source true
+                       :prep-tasks ["compile" ["fig:min"]]}})
