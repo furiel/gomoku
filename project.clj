@@ -12,6 +12,7 @@
                  [com.cognitect/transit-cljs "0.8.256"]
                  [org.clojure/core.async "1.1.587"]
                  [com.bhauman/rebel-readline-cljs "0.1.4"]
+                 [com.taoensso/timbre "4.10.0"]
                  [reagent "0.10.0"]]
   :aliases {"fig:build" ["trampoline" "run" "-m" "figwheel.main" "-b" "dev" "-r"]
             "fig:min"   ["run" "-m" "figwheel.main" "--build-once" "prod"]}

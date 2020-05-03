@@ -1,6 +1,7 @@
 (ns gomoku.routes
   (:require
    [gomoku.websockets :refer [wrap-ws]]
+   [taoensso.timbre :refer [debug]]
    [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
    [ring.middleware.params :refer [wrap-params]]
    [ring.util.response :refer [resource-response content-type]])
@@ -18,7 +19,13 @@
 (defn- default-handler []
   (wrap-defaults root-handler site-defaults))
 
+(defn- wrap-log [handler]
+  (fn [req]
+    (debug req)
+    (handler req)))
+
 (defn route []
   (-> (default-handler)
       wrap-ws
+      wrap-log
       wrap-params))
